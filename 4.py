@@ -92,55 +92,11 @@ def find_winner(numbers, boards, first):
 numbers = [int(i) for i in lines[0].split(',')]
 boards = get_boards(lines)
 winners = find_winner(numbers, boards, True)
-board = list(winners.values())[0]
-print(board)
-print(f'Score:{board.score}')
-print()
-# called, board, score = find_winner(numbers, boards, False)
-# print(called)
-# print(board)
-# print(f'Score:{score}')
+first = list(winners.values())[0]
 last = list(winners.values())[-1]
-print(last)
-print(last.score)
+print(first)
+print('Score:', first.score)
 print()
-
-debug = False
-c = []
-for n in numbers:
-	c.append(n)
-	if debug:
-		print(c)
-	reprs = []
-	for b in boards:
-		isw = False
-		for w in b.winners:
-			if w.issubset(set(c)):
-				isw = True
-				break
-		if not isw:
-			b.called = c[::]
-			reprs.append(b)
-
-	if len(reprs) == 1:
-		last = reprs[0]
-	if len(reprs) == 0:
-		last.called = c[::]
-		break
-
-	if debug:
-		rc = 14
-		for i in range(len(reprs)// rc + 1):
-			row = reprs[i*rc:i*rc + rc]
-			for r in range(5):
-				for rep in row:
-					print(str(rep).split('\n')[r], end='  ')
-				print()
-			print()
-
-		print('-'*32)
-
-
 print(last)
 print('Score:', last.score)
 print()

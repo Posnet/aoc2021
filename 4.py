@@ -7,7 +7,7 @@ class Board:
 		self.data = data
 		self.width = width
 		self._winners = None
-		self.numbers = []
+		self.called = []
 
 	def __repr__(self):
 		res = []
@@ -16,12 +16,18 @@ class Board:
 			end = (self.width * (i + 1)) 
 			row = []
 			for d in self.data[start:end]:
-				if d in self.numbers:
+				if d in self.called:
 					row.append(colored(f'{d:>2}', 'green'))
 				else:
 					row.append(f'{d:>2}')
 			res.append(' '.join(row))
 		return '\n'.join(res)
+
+	@property
+	def score(self):
+		unmarked = sum(set(self.data) - set(self.called))
+		score = unmarked * self.called[-1]
+		return score
 
 	@property
 	def columns(self):
@@ -65,26 +71,76 @@ def get_boards(lines):
 		boards.append(Board(data, width))
 	return boards
 
-def find_winner(numbers, boards):
+def find_winner(numbers, boards, first):
 	all_winners = []
 	for idx, b in enumerate(boards):
 		for w in b.winners:
 			all_winners.append((w, idx))
+	boards = dict(enumerate(boards))
+	winners = {}
 	called = set()
-	for n in numbers:
+	for nidx, n in enumerate(numbers):
 		called.add(n)
 		for w, idx in all_winners:
 			if w.issubset(called):
-				b = boards[idx]
-				print(w)
-				unmarked = sum(set(b.data) - called)
-				score = unmarked * n
-				b.numbers = called
-				return called, b, score
+				if idx not in winners:
+					b = boards[idx]
+					b.called = numbers[:nidx+1]
+					winners[idx] = b
+	return winners
 
 numbers = [int(i) for i in lines[0].split(',')]
 boards = get_boards(lines)
-called, board, score = find_winner(numbers, boards)
-print(called)
+winners = find_winner(numbers, boards, True)
+board = list(winners.values())[0]
 print(board)
-print(f'Score:{score}')
+print(f'Score:{board.score}')
+print()
+# called, board, score = find_winner(numbers, boards, False)
+# print(called)
+# print(board)
+# print(f'Score:{score}')
+last = list(winners.values())[-1]
+print(last)
+print(last.score)
+print()
+
+debug = False
+c = []
+for n in numbers:
+	c.append(n)
+	if debug:
+		print(c)
+	reprs = []
+	for b in boards:
+		isw = False
+		for w in b.winners:
+			if w.issubset(set(c)):
+				isw = True
+				break
+		if not isw:
+			b.called = c[::]
+			reprs.append(b)
+
+	if len(reprs) == 1:
+		last = reprs[0]
+	if len(reprs) == 0:
+		last.called = c[::]
+		break
+
+	if debug:
+		rc = 14
+		for i in range(len(reprs)// rc + 1):
+			row = reprs[i*rc:i*rc + rc]
+			for r in range(5):
+				for rep in row:
+					print(str(rep).split('\n')[r], end='  ')
+				print()
+			print()
+
+		print('-'*32)
+
+
+print(last)
+print('Score:', last.score)
+print()

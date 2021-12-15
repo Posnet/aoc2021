@@ -107,22 +107,31 @@ def search(start, end, mcost, cb=None):
 
 
 
-nodes = []
 for line in lines:
     line = line.strip()
     if line:
-        grid.append([Node(int(i)) for i in line])
-        nodes += grid[-1]
-
+        grid.append([int(i) for i in line])
 
 w = len(grid[0])
 h = len(grid)
 
-print(h, w)
-print()
+nodes = []
+ng = [[-1] * w * 5 for _ in range(h * 5)]
+for y in range(len(ng[0])):
+    for x in range(len(ng)):
+        n = grid[x % w][y % h] + (x // w) + (y // h)
+        if n > 9:
+            n = (n % 10) + 1
+        n = Node(n)
+        nodes.append(n)
+        ng[x][y] = n
+
+grid = ng
+
+w = len(grid[0])
+h = len(grid)
 
 adj = [(-1, 0), (+1, 0), (0, -1), (0, +1)]
-
 total_cost = 0
 for y in range(h):
     for x in range(w):
@@ -138,6 +147,6 @@ for y in range(h):
                 node._edges.append(neb)
 
 
-path = search(nodes[0], nodes[-1], total_cost, cb=lambda: print_grid(grid))
-print_grid(grid)
+path = search(nodes[0], nodes[-1], total_cost)
+# print_grid(grid)
 print(sum([c.cost for c in path[1:]]))
